@@ -17,7 +17,7 @@ vpath .base build
 ########################################################
 
 # your C compiler:
-CC       = gcc
+CC       = x86_64-conda_cos6-linux-gnu-gcc
 #CC       = icc
 #CC       = pgcc
 
@@ -194,7 +194,7 @@ ifdef OMPFLAG
 else
 	grep -v "lgomp" python/setup.py > python/autosetup.py
 endif
-	@cd python; export CC=$(CC); $(PYTHON) autosetup.py install || $(PYTHON) autosetup.py install --user
+	@cd python; export CC=$(CC); export LD_LIBRARY_PATH=""; $(PYTHON) autosetup.py install || $(PYTHON) autosetup.py install --user
 	@rm python/autosetup.py
 
 clean: .base

@@ -9,13 +9,13 @@ import os.path as osp
 
 # Recover the gcc compiler
 GCCPATH_STRING = sbp.Popen(
-    ['gcc', '-print-libgcc-file-name'],
+    [os.environ['CC'], '-print-libgcc-file-name'],
     stdout=sbp.PIPE).communicate()[0]
 GCCPATH = osp.normpath(osp.dirname(GCCPATH_STRING)).decode()
 
 liblist = ["class"]
 MVEC_STRING = sbp.Popen(
-    ['gcc', '-lmvec'],
+    [os.environ['CC'], '-lmvec'],
     stderr=sbp.PIPE).communicate()[1]
 if b"mvec" not in MVEC_STRING:
     liblist += ["mvec","m"]
