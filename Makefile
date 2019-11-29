@@ -78,11 +78,7 @@ endif
 $(WRKDIR)/%.o:%.c .base
 	$(CC) $(OPTFLAG) $(OMPFLAG) $(CCFLAG) $(INCLUDES) -c $< -o $(WRKDIR)/$*.o
 
-# <<<<<<< HEAD
 TOOLS = growTable.o dei_rkck.o sparse.o evolver_rkck.o evolver_ndf15.o arrays.o parser.o quadrature.o hyperspherical.o common.o trigonometric_integrals.o
-# =======
-# TOOLS = growTable.o dei_rkck.o sparse.o evolver_rkck.o  evolver_ndf15.o arrays.o parser.o quadrature.o hyperspherical.o common.o trigonometric_integrals.o
-# >>>>>>> 7e95aba4e1eea5f3e6269765653b1dbce0d74a67
 
 SOURCE = input.o background.o thermodynamics.o perturbations.o primordial.o nonlinear.o transfer.o spectra.o lensing.o
 
@@ -203,6 +199,8 @@ ifdef OMPFLAG
 else
 	grep -v "lgomp" python/setup.py > python/autosetup.py
 endif
+# Removes previously installed classy library if it's there.
+	@rm -f $(shell python -c "import classy; print(classy.__file__)")
 	@cd python; export CC=$(CC); export LD_LIBRARY_PATH=""; $(PYTHON) autosetup.py install || $(PYTHON) autosetup.py install --user
 	@rm python/autosetup.py
 
@@ -211,3 +209,4 @@ clean: .base
 	@rm -f libclass.a
 	@rm -f $(MDIR)/python/classy.c
 	@rm -rf $(MDIR)/python/build
+	@rm -f $(shell python -c "import classy; print(classy.__file__)")
