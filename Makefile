@@ -78,7 +78,11 @@ endif
 $(WRKDIR)/%.o:%.c .base
 	$(CC) $(OPTFLAG) $(OMPFLAG) $(CCFLAG) $(INCLUDES) -c $< -o $(WRKDIR)/$*.o
 
-TOOLS = growTable.o dei_rkck.o sparse.o evolver_rkck.o evolver_ndf15.o arrays.o parser.o quadrature.o hyperspherical.o common.o
+# <<<<<<< HEAD
+TOOLS = growTable.o dei_rkck.o sparse.o evolver_rkck.o evolver_ndf15.o arrays.o parser.o quadrature.o hyperspherical.o common.o trigonometric_integrals.o
+# =======
+# TOOLS = growTable.o dei_rkck.o sparse.o evolver_rkck.o  evolver_ndf15.o arrays.o parser.o quadrature.o hyperspherical.o common.o trigonometric_integrals.o
+# >>>>>>> 7e95aba4e1eea5f3e6269765653b1dbce0d74a67
 
 SOURCE = input.o background.o thermodynamics.o perturbations.o primordial.o nonlinear.o transfer.o spectra.o lensing.o
 
@@ -111,6 +115,8 @@ TEST_LOOPS = test_loops.o
 TEST_LOOPS_OMP = test_loops_omp.o
 
 TEST_DEGENERACY = test_degeneracy.o
+
+TEST_SPECTRA = test_spectra.o
 
 TEST_TRANSFER = test_transfer.o
 
@@ -168,6 +174,9 @@ test_degeneracy: $(addprefix $(WRKDIR)/, $(TOOLS) $(SOURCE) $(EXTERNAL) $(OUTPUT
 
 test_transfer: $(addprefix $(WRKDIR)/, $(TOOLS) $(SOURCE) $(EXTERNAL) $(TEST_TRANSFER))
 	$(CC) $(OPTFLAG) $(OMPFLAG) $(LDFLAG) -o $@ $(addprefix $(WRKDIR)/,$(notdir $^)) $(LDLIBS)
+
+test_spectra: $(addprefix $(WRKDIR)/, $(TOOLS) $(SOURCE) $(EXTERNAL) $(TEST_SPECTRA))
+	$(CC) $(OPTFLAG) $(OMPFLAG) $(LDFLAG) -o  $@ $(addprefix $(WRKDIR)/,$(notdir $^)) $(LDLIBS)
 
 test_nonlinear: $(addprefix $(WRKDIR)/, $(TOOLS) $(SOURCE) $(EXTERNAL) $(TEST_NONLINEAR))
 	$(CC) $(OPTFLAG) $(OMPFLAG) $(LDFLAG) -o $@ $(addprefix $(WRKDIR)/,$(notdir $^)) $(LDLIBS)
