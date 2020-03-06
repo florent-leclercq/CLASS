@@ -17,7 +17,7 @@ vpath .base build
 ########################################################
 
 # your C compiler:
-CC       = x86_64-conda_cos6-linux-gnu-gcc
+CC       = gcc
 #CC       = icc
 #CC       = pgcc
 
