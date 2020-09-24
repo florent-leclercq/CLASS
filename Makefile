@@ -110,8 +110,6 @@ TEST_LOOPS = test_loops.o
 
 TEST_LOOPS_OMP = test_loops_omp.o
 
-TEST_DEGENERACY = test_degeneracy.o
-
 TEST_SPECTRA = test_spectra.o
 
 TEST_TRANSFER = test_transfer.o
@@ -124,11 +122,7 @@ TEST_THERMODYNAMICS = test_thermodynamics.o
 
 TEST_BACKGROUND = test_background.o
 
-TEST_SIGMA = test_sigma.o
-
 TEST_HYPERSPHERICAL = test_hyperspherical.o
-
-TEST_STEPHANE = test_stephane.o
 
 C_TOOLS = $(addprefix tools/, $(addsuffix .c,$(basename $(TOOLS))))
 C_SOURCE = $(addprefix source/, $(addsuffix .c,$(basename $(SOURCE) $(OUTPUT))))
@@ -153,22 +147,10 @@ libclass.a: $(addprefix $(WRKDIR)/, $(TOOLS) $(SOURCE) $(EXTERNAL))
 class: $(addprefix $(WRKDIR)/, $(TOOLS) $(SOURCE) $(EXTERNAL) $(OUTPUT) $(CLASS))
 	$(CC) $(OPTFLAG) $(OMPFLAG) $(LDFLAG) -o class $(addprefix $(WRKDIR)/,$(notdir $^)) $(LDLIBS)
 
-test_sigma: $(addprefix $(WRKDIR)/, $(TOOLS) $(SOURCE) $(EXTERNAL) $(OUTPUT) $(TEST_SIGMA))
-	$(CC) $(OPTFLAG) $(OMPFLAG) $(LDFLAG) -o test_sigma $(addprefix $(WRKDIR)/,$(notdir $^)) $(LDLIBS)
-
 test_loops: $(addprefix $(WRKDIR)/, $(TOOLS) $(SOURCE) $(EXTERNAL) $(OUTPUT) $(TEST_LOOPS))
 	$(CC) $(OPTFLAG) $(OMPFLAG) $(LDFLAG) -o $@ $(addprefix $(WRKDIR)/,$(notdir $^)) $(LDLIBS)
 
 test_loops_omp: $(addprefix $(WRKDIR)/, $(TOOLS) $(SOURCE) $(EXTERNAL) $(OUTPUT) $(TEST_LOOPS_OMP))
-	$(CC) $(OPTFLAG) $(OMPFLAG) $(LDFLAG) -o $@ $(addprefix $(WRKDIR)/,$(notdir $^)) $(LDLIBS)
-
-test_stephane: $(addprefix $(WRKDIR)/, $(TOOLS) $(SOURCE) $(EXTERNAL) $(OUTPUT) $(TEST_STEPHANE))
-	$(CC) $(OPTFLAG) $(OMPFLAG) $(LDFLAG) -o $@ $(addprefix $(WRKDIR)/,$(notdir $^)) $(LDLIBS)
-
-test_degeneracy: $(addprefix $(WRKDIR)/, $(TOOLS) $(SOURCE) $(EXTERNAL) $(OUTPUT) $(TEST_DEGENERACY))
-	$(CC) $(OPTFLAG) $(OMPFLAG) $(LDFLAG) -o $@ $(addprefix $(WRKDIR)/,$(notdir $^)) $(LDLIBS)
-
-test_transfer: $(addprefix $(WRKDIR)/, $(TOOLS) $(SOURCE) $(EXTERNAL) $(TEST_TRANSFER))
 	$(CC) $(OPTFLAG) $(OMPFLAG) $(LDFLAG) -o $@ $(addprefix $(WRKDIR)/,$(notdir $^)) $(LDLIBS)
 
 test_spectra: $(addprefix $(WRKDIR)/, $(TOOLS) $(SOURCE) $(EXTERNAL) $(TEST_SPECTRA))
