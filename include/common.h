@@ -15,7 +15,8 @@
 #ifndef __COMMON__
 #define __COMMON__
 
-#define _VERSION_ "v2.9.4"
+#define _VERSION_ "v3.3.0"
+
 /* @cond INCLUDE_WITH_DOXYGEN */
 
 #define _TRUE_ 1 /**< integer associated to true statement */
@@ -29,6 +30,8 @@ typedef char ErrorMsg[_ERRORMSGSIZE_]; /**< Generic error messages (there is suc
 
 #define _FILENAMESIZE_ 256 /**< size of the string read in each line of the file (extra characters not taken into account) */
 typedef char FileName[_FILENAMESIZE_];
+
+#define _SUFFIXNAMESIZE_ 4 /**< maximum size of the short string appended to file names to account for initial conditions, etc. */
 
 #define _PI_ 3.1415926535897932384626433832795e0 /**< The number pi */
 
@@ -73,13 +76,39 @@ typedef char FileName[_FILENAMESIZE_];
 #define SIGN(a) (((a)>0) ? 1. : -1. )
 #define NRSIGN(a,b) ((b) >= 0.0 ? fabs(a) : -fabs(a))
 #define index_symmetric_matrix(i1,i2,N) (((i1)<=(i2)) ? ((i2)+N*(i1)-((i1)*((i1)+1))/2) : ((i1)+N*(i2)-((i2)*((i2)+1))/2)) /**< assigns an index from 0 to [N(N+1)/2-1] to the coefficients M_{i1,i2} of an N*N symmetric matrix; useful for converting a symmetric matrix to a vector, without losing or double-counting any information */
-/* @endcond */
-// needed because of weird openmp bug on macosx lion...
-void class_protect_sprintf(char* dest, char* tpl,...);
-void class_protect_fprintf(FILE* dest, char* tpl,...);
-void* class_protect_memcpy(void* dest, void* from, size_t sz);
 
-int get_number_of_titles(char * titlestring);
+/* @endcond */
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+    /* needed because of weird openmp bug on macosx lion... */
+    void class_protect_sprintf(char* dest, char* tpl, ...);
+    void class_protect_fprintf(FILE* dest, char* tpl, ...);
+    void* class_protect_memcpy(void* dest, void* from, size_t sz);
+
+    /* some general functions */
+    int get_number_of_titles(char * titlestring);
+    int file_exists(const char *fname);
+    int compare_doubles(const void * a,
+                        const void * b);
+    int string_begins_with(char* thestring, char beginchar);
+#ifdef __cplusplus
+}
+#endif
+
+/* general CLASS macros */
+
+//This macro receives additional 'do {' and '} while(0)' to safeguard
+//in single-line if else clauses without '{' and '}'
+//Also, careful: Since sprintf(NULL,0,x) returns the size of characters
+//that are inside of the string x, then the buffer needs to be
+//actually one character longer to hold also the null character '\0'
+#define class_sprintf(string, format...) do {                                                                       \
+  int _buffer_size_sprintf = snprintf(NULL, 0, format);                                                          \
+  snprintf(string, _buffer_size_sprintf+1, format);                                                                \
+} while (0)
 
 #define class_build_error_string(dest,tmpl,...) {                                                                \
   ErrorMsg FMsg;                                                                                                 \
@@ -114,15 +143,15 @@ int get_number_of_titles(char * titlestring);
 #define class_call(function, error_message_from_function, error_message_output)                                  \
   class_call_except(function, error_message_from_function,error_message_output,)
 
-/* same in parallel region */
-#define class_call_parallel(function, error_message_from_function, error_message_output) {                       \
-  if (abort == _FALSE_) {                                                                                        \
+/* same in parallel region  -- UNUSED NOW */
+/*#define class_call_parallel(function, error_message_from_function, error_message_output) {                       \
+  if (abort_now == _FALSE_) {                                                                                        \
     if (function == _FAILURE_) {                                                                                 \
       class_call_message(error_message_output,#function,error_message_from_function);                            \
-      abort=_TRUE_;                                                                                              \
+      abort_now=_TRUE_;                                                                                              \
     }                                                                                                            \
   }                                                                                                              \
-}
+}*/
 
 
 
@@ -133,7 +162,7 @@ int get_number_of_titles(char * titlestring);
 
 /* macro for allocating memory and returning error if it failed */
 #define class_alloc(pointer, size, error_message_output)  {                                                      \
-  pointer=malloc(size);                                                                                          \
+  pointer=(__typeof__(pointer))malloc(size);                                                                                          \
   if (pointer == NULL) {                                                                                         \
     int size_int;                                                                                                \
     size_int = size;                                                                                             \
@@ -142,23 +171,24 @@ int get_number_of_titles(char * titlestring);
   }                                                                                                              \
 }
 
-/* same inside parallel structure */
+
+/* same inside parallel structure -- UNUSED NOW
 #define class_alloc_parallel(pointer, size, error_message_output)  {                                             \
   pointer=NULL;                                                                                                  \
-  if (abort == _FALSE_) {                                                                                        \
-    pointer=malloc(size);                                                                                        \
+  if (abort_now == _FALSE_) {                                                                                        \
+    pointer=(__typeof__(pointer))malloc(size);                                                                                        \
     if (pointer == NULL) {                                                                                       \
       int size_int;                                                                                              \
       size_int = size;                                                                                           \
       class_alloc_message(error_message_output,#pointer, size_int);                                              \
-      abort=_TRUE_;                                                                                              \
+      abort_now=_TRUE_;                                                                                              \
     }                                                                                                            \
   }                                                                                                              \
-}
+}*/
 
 /* macro for allocating memory, initializing it with zeros/ and returning error if it failed */
 #define class_calloc(pointer, init,size, error_message_output)  {                                                \
-  pointer=calloc(init,size);                                                                                     \
+  pointer=(__typeof__(pointer))calloc(init,size);                                                                                     \
   if (pointer == NULL) {                                                                                         \
     int size_int;                                                                                                \
     size_int = size;                                                                                             \
@@ -168,8 +198,8 @@ int get_number_of_titles(char * titlestring);
 }
 
 /* macro for re-allocating memory, returning error if it failed */
-#define class_realloc(pointer, newname, size, error_message_output)  {                                          \
-    pointer=realloc(newname,size);                                                                               \
+#define class_realloc(pointer, size, error_message_output)  {                                          \
+    pointer=(__typeof__(pointer))realloc(pointer,size);                                                                               \
   if (pointer == NULL) {                                                                                         \
     int size_int;                                                                                                \
     size_int = size;                                                                                             \
@@ -204,14 +234,15 @@ int get_number_of_titles(char * titlestring);
   }                                                                                                              \
 }
 
+/* UNUSED NOW
 #define class_test_parallel(condition, error_message_output, args...) {                                          \
-  if (abort == _FALSE_) {                                                                                        \
+  if (abort_now == _FALSE_) {                                                                                        \
     if (condition) {                                                                                             \
       class_test_message(error_message_output,#condition, args);                                                 \
-      abort=_TRUE_;                                                                                              \
+      abort_now=_TRUE_;                                                                                              \
     }                                                                                                            \
   }                                                                     \
-}
+}*/
 
 /* macro for returning error message;
    args is a variable list of optional arguments, e.g.: args="x=%d",x
@@ -310,6 +341,33 @@ int get_number_of_titles(char * titlestring);
       storage[dataindex++] = defaultvalue;                              \
 }
 
+//The name for this macro can be at most 30 characters total
+#define class_print_species(name,type) \
+printf("-> %-30s Omega = %-15g , omega = %-15g\n",name,pba->Omega0_##type,pba->Omega0_##type*pba->h*pba->h);
+
+//Generic evolver prototype
+#define EVOLVER_PROTOTYPE \
+    int (*)(double, double *, double *, void *, ErrorMsg), \
+    double, double, double *, int *, \
+    int, void *, double, double, \
+    int (*)(double, void *, double *, ErrorMsg), \
+    double, double *, int, \
+    int (*)(double, double *, double *, int, void *, ErrorMsg), \
+    int (*)(double, double *, double *, void *, ErrorMsg), \
+    ErrorMsg
+
+/* Forward-Declare the structs of CLASS */
+struct background;
+struct thermodynamics;
+struct perturbations;
+struct transfer;
+struct primordial;
+struct harmonic;
+struct fourier;
+struct lensing;
+struct distortions;
+struct output;
+
 /** parameters related to the precision of the code and to the method of calculation */
 
 /**
@@ -347,8 +405,9 @@ enum file_format {class_format,camb_format};
 struct precision
 {
   /**
-   * Define (allocate) all precision parameters
-   *
+   * Define (allocate) all precision parameters (these very concise
+   * lines declare all precision parameters thanks to the macros
+   * defined in macros_precision.h)
    */
 
   #define __ALLOCATE_PRECISION_PARAMETER__
@@ -372,7 +431,6 @@ struct precision
   //@}
 
 };
-
 
 
 #endif

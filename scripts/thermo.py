@@ -1,11 +1,12 @@
-
+#!/usr/bin/env python
 # coding: utf-8
 
 # In[ ]:
 
+
 # import necessary modules
 # uncomment to get plots displayed in notebook
-#%matplotlib inline
+#get_ipython().run_line_magic('matplotlib', 'inline')
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -17,26 +18,15 @@ import math
 
 # In[ ]:
 
-# esthetic definitions for the plots
-font = {'size'   : 16, 'family':'STIXGeneral'}
-axislabelfontsize='large'
-matplotlib.rc('font', **font)
-matplotlib.mathtext.rcParams['legend.fontsize']='medium'
-plt.rcParams["figure.figsize"] = [8.0,6.0]
-
-
-# In[ ]:
 
 common_settings = {'output' : 'tCl',
                    # LambdaCDM parameters
-                   'h':0.67556,
-                   'omega_b':0.022032,
-                   'omega_cdm':0.12038,
-                   'A_s':2.215e-9,
-                   'n_s':0.9619,
-                   'tau_reio':0.0925,
-                   # Take fixed value for primordial Helium (instead of automatic BBN adjustment)
-                   'YHe':0.246,
+                   'h':0.6781,
+                   'omega_b':0.02238280,
+                   'omega_cdm':0.1201075,
+                   'A_s':2.100549e-09,
+                   'n_s':0.9660499,
+                   'tau_reio':0.05430842,
                    'thermodynamics_verbose':1
                    }
 ##############
@@ -47,12 +37,13 @@ common_settings = {'output' : 'tCl',
 M = Class()
 M.set(common_settings)
 M.compute()
-derived = M.get_current_derived_parameters(['tau_rec','conformal_age'])
+derived = M.get_current_derived_parameters(['tau_rec','conformal_age','conf_time_reio'])
 thermo = M.get_thermodynamics()
-print thermo.viewkeys()
+print (thermo.keys())
 
 
 # In[ ]:
+
 
 tau = thermo['conf. time [Mpc]']
 g = thermo['g [Mpc^-1]']
@@ -68,16 +59,7 @@ plt.xlim([1.e2,derived['conformal_age']])
 plt.xlabel(r'$\tau \,\,\, \mathrm{[Mpc]}$')
 plt.ylabel(r'$\mathrm{visibility} \,\,\, g \,\,\, [\mathrm{Mpc}^{-1}]$')
 plt.axvline(x=derived['tau_rec'],color='k')
-# The conformal time at reionisation  could be extracted from the code.
-# But we know it because it is part of the standard output
-# when thermodynamics_verbose=1
-plt.axvline(x=4255.316282,color='k')
-#
-# Print functions one by one, saving between each (for slides)
+plt.axvline(x=derived['conf_time_reio'],color='k')
 #
 plt.semilogx(tau,g,'r',label=r'$\psi$')
-
-
-# In[ ]:
-
 plt.savefig('thermo.pdf',bbox_inches='tight')
